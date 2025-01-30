@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PostForm, RegisterForm
+from .forms import PostForm, RegisterForm, CommentForm
 from .models import Post
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
@@ -52,11 +52,27 @@ def updatePost(request, pk):
     context = {'form': form}
     return render(request, "update_post.html", context)
 
-@login_required(login_url='login')
+@login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    return render(request, 'post_detail.html', {'post': post})
-
+    comments = post.comments.all()
+    
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post
+            new_comment.user = request.user
+            new_comment.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        comment_form = CommentForm()
+    
+    return render(request, 'post_detail.html', {
+        'post': post,
+        'comments': comments,
+        'comment_form': comment_form
+    })
 def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)

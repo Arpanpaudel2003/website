@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post
+from .models import Post, Comment
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -35,4 +35,12 @@ class RegisterForm(UserCreationForm):
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your username'}),
             'password1': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter password'}),
             'password2': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm password'}),
+        }
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'placeholder': 'Enter your comment'}),
         }
