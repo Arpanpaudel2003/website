@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PostForm, RegisterForm, CommentForm
-from .models import Post
+from .forms import PostForm, RegisterForm, CommentForm, ProfileUpdateForm
+from .models import Post, UserProfile
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -80,11 +80,23 @@ def post_detail(request, post_id):
 @login_required(login_url='login')
 def user_profile(request, username):
     user = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(user=user).order_by('-created') 
+    posts = Post.objects.filter(user=user).order_by('-created')
+    
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
+
+    if request.method == "POST":
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('user_profile', username=user.username)
+    else:
+        form = ProfileUpdateForm(instance=user_profile)
 
     context = {
         'profile_user': user,
         'posts': posts,
+        'form': form,
+        'user_profile': user_profile,
     }
     return render(request, 'user_profile.html', context)
 

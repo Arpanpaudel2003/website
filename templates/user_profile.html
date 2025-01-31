@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>User Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .card-body h5 {
+            font-weight: bold;
+        }
+        .card-body p {
+            color: #666;
+        }
+        .btn-primary, .btn-info {
+            border-radius: 25px;
+        }
+    </style>
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Update</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
@@ -12,15 +37,28 @@
             <div class="col-md-10">
                 <div class="card shadow-lg p-4">
                     <div class="row align-items-center">
+                        <!-- Profile Picture and Info -->
                         <div class="col-md-4 text-center">
-                            <img src="https://via.placeholder.com/150" alt="Profile Picture" class="img-fluid rounded-circle mb-3">
+                            <img src="{{ user_profile.profile_picture.url|default:'/media/profile_pics/default.jpg' }}" 
+                                 alt="Profile Picture" class="img-fluid rounded-circle mb-3 profile-picture">
                             <h4 class="fw-bold">{{ profile_user.username }}</h4>
                             <p class="text-muted">{{ profile_user.email }}</p>
                             <p class="text-muted">Joined: {{ profile_user.date_joined|date:"F d, Y" }}</p>
+
                             {% if user == profile_user %}
-                                <a href="#" class="btn btn-primary">Edit Profile</a>
+                                <!-- Profile Picture Update Form -->
+                                <form method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="profile_picture" class="form-label">{{ form.profile_picture.label }}</label>
+                                        {{ form.profile_picture }}
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Update Profile Picture</button>
+                                </form>
                             {% endif %}
                         </div>
+
+                        <!-- Recent Posts Section -->
                         <div class="col-md-8">
                             <h3 class="mb-3">Recent Posts</h3>
                             {% for post in posts %}
@@ -36,13 +74,19 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <div>
+
+                    <!-- Back Button -->
+                    <div class="mt-4 text-center">
                         <a href="{% url 'blog' %}" class="btn btn-secondary">Back</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</body>
+</html>
+
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
