@@ -3,6 +3,7 @@ from .forms import PostForm, RegisterForm, CommentForm
 from .models import Post
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -52,7 +53,7 @@ def updatePost(request, pk):
     context = {'form': form}
     return render(request, "update_post.html", context)
 
-@login_required
+@login_required(login_url='login')
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comments = post.comments.all()
@@ -73,6 +74,20 @@ def post_detail(request, post_id):
         'comments': comments,
         'comment_form': comment_form
     })
+
+@login_required(login_url='login')
+def user_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    posts = Post.objects.all().order_by('-created')
+    
+    context = {
+        'profile_user': user,
+        'posts': posts,
+    }
+    return render(request, 'user_profile.html', context)
+
+
+
 def register_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
