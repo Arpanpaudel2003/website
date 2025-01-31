@@ -11,20 +11,22 @@ from django.contrib.auth.views import LoginView
 @login_required(login_url='login')
 def blog(request):
     search_query = request.GET.get('search', '')
-    
+
     if search_query:
-        posts = Post.objects.filter(para__icontains=search_query) 
+        posts = Post.objects.filter(para__icontains=search_query)
     else:
         posts = Post.objects.all()
-    
+
     form = PostForm()
-    
+
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
-            form.save()
+            post = form.save(commit=False)  # Don't save yet
+            post.user = request.user  # Assign logged-in user as author
+            post.save()  # Now save the post
             return redirect("/blog")
-    
+
     context = {'posts': posts, 'form': form, 'search_query': search_query}
     return render(request, 'blog.html', context)
 
@@ -78,8 +80,8 @@ def post_detail(request, post_id):
 @login_required(login_url='login')
 def user_profile(request, username):
     user = get_object_or_404(User, username=username)
-    posts = Post.objects.all().order_by('-created')
-    
+    posts = Post.objects.filter(user=user).order_by('-created') 
+
     context = {
         'profile_user': user,
         'posts': posts,
